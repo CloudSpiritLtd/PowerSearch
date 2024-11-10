@@ -10,17 +10,15 @@ using Newtonsoft.Json.Serialization;
 namespace PowerSearch.Models;
 
 [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
-public class Condition //: ICondition
+public class Search //: ICondition
 {
     [JsonConverter(typeof(StringEnumConverter))]
-    public ConditionKind Kind { get; set; } = ConditionKind.Regex;
+    public SearchKind Kind { get; set; } = SearchKind.Regex;
 
-    public string Expression { get; set; } = string.Empty;
+    public string With { get; set; } = string.Empty;
 
     public bool IgnoreCase { get; set; } = true;
 
-    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
-    public Extract? Extract { get; set; } = null;
 }
 
 [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]

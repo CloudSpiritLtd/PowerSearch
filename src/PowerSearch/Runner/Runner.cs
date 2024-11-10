@@ -7,9 +7,9 @@ using PowerSearch.Models;
 
 namespace PowerSearch.Runner;
 
-public class SimpleRunner(SearchProfile profile)
+public class SimpleRunner(Profile profile)
 {
-    private readonly SearchProfile _profile = profile;
+    private readonly Profile _profile = profile;
 
     public async IAsyncEnumerable<SearchResult> Run(string rootFolder)
     {
@@ -19,9 +19,9 @@ public class SimpleRunner(SearchProfile profile)
         {
             var content = await File.ReadAllTextAsync(file, Encoding.UTF8);
             SearchResult? lastResult = null;
-            foreach (var cond in _profile.Conditions)
+            foreach (var item in _profile.Pipeline)
             {
-                SearchExecutor exec = new(cond);
+                SearchExecutor exec = new(item.Search, item.Extract);
                 exec.Execute(content, lastResult);
                 if (exec.Success)
                 {

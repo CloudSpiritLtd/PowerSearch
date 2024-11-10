@@ -14,38 +14,38 @@ namespace PowerSearch.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
-    private SearchProfile _profile = new();
+    private Profile _profile = new();
 
     public MainViewModel()
     {
 #if DEBUG
         if (Design.IsDesignMode)
         {
-            AddCondition();
+            AddPipelineItem();
             Results.Add(new() { FileName = "Demo", Text = "Demo Text" });
         }
 #endif
 
-        AddConditionCommand = ReactiveCommand.Create(AddCondition);
-        DeleteConditionCommand = ReactiveCommand.Create<ConditionViewModel>(DeleteCondition);
+        AddPipelineItemCommand = ReactiveCommand.Create(AddPipelineItem);
+        DeletePipelineItemCommand = ReactiveCommand.Create<PipelineItemViewModel>(DeletePipelineItem);
         SearchCommand = ReactiveCommand.Create(Search);
     }
 
-    public void AddCondition()
+    public void AddPipelineItem()
     {
-        Condition cond = new();
-        _profile.Conditions.Add(cond);
-        Conditions.Add(new ConditionViewModel(cond));
+        PipelineItem item = new();
+        _profile.Pipeline.Add(item);
+        Pipeline.Add(new PipelineItemViewModel(item));
     }
 
-    public void DeleteCondition(ConditionViewModel cond)
+    public void DeletePipelineItem(PipelineItemViewModel cond)
     {
-        Conditions.Remove(cond);
+        Pipeline.Remove(cond);
     }
 
     public void LoadProfile(Stream file)
     {
-        var profile = SearchProfile.LoadFromFile(file);
+        var profile = Profile.LoadFromFile(file);
         if (profile == null)
         {
             throw new InvalidDataException("Invalid profile");
@@ -63,13 +63,13 @@ public class MainViewModel : ViewModelBase
     {
         //todo: need release _profile?
 
-        _profile = new SearchProfile();
+        _profile = new Profile();
         LoadSettingsFromProfile();
     }
 
     public void SaveProfile(Stream stream)
     {
-        SearchProfile.SaveToFile(stream, _profile);
+        Profile.SaveToFile(stream, _profile);
     }
 
     public async void Search()
@@ -82,7 +82,7 @@ public class MainViewModel : ViewModelBase
             return;
         }
 
-        if (_profile.Conditions.Count == 0)
+        if (_profile.Pipeline.Count == 0)
         {
             var box = MessageBoxManager.GetMessageBoxStandard("Error", "No search conditions.", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error);
             await box.ShowAsync();
@@ -100,15 +100,15 @@ public class MainViewModel : ViewModelBase
 
     private void LoadSettingsFromProfile()
     {
-        Conditions.Clear();
-        _profile.Conditions.ForEach(cond => Conditions.Add(new ConditionViewModel(cond)));
+        Pipeline.Clear();
+        _profile.Pipeline.ForEach(cond => Pipeline.Add(new PipelineItemViewModel(cond)));
     }
 
-    public ReactiveCommand<Unit, Unit> AddConditionCommand { get; }
+    public ReactiveCommand<Unit, Unit> AddPipelineItemCommand { get; }
 
-    public ObservableCollection<ConditionViewModel> Conditions { get; set; } = [];
+    public ObservableCollection<PipelineItemViewModel> Pipeline { get; set; } = [];
 
-    public ReactiveCommand<ConditionViewModel, Unit> DeleteConditionCommand { get; }
+    public ReactiveCommand<PipelineItemViewModel, Unit> DeletePipelineItemCommand { get; }
 
     public ObservableCollection<SearchResult> Results { get; set; } = [];
 

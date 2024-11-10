@@ -4,7 +4,7 @@ namespace PowerSearch.Models;
 
 public interface ICondition
 {
-    ConditionKind Kind { get; set; }
+    SearchKind Kind { get; set; }
 
     string Expression { get; set; }
 
@@ -19,7 +19,7 @@ public interface IExtract
     int Group { get; set; }
 }
 
-public enum ConditionKind
+public enum SearchKind
 {
     Text,
     Wildcard,

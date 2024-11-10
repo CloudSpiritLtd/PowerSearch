@@ -49,16 +49,16 @@
         <!--  filters  -->
         <Grid Grid.Row="2">
             <StackPanel>
-                <ItemsControl ItemsSource="{Binding Conditions}">
+                <ItemsControl ItemsSource="{Binding Pipeline}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:ConditionViewModel}">
+                        <DataTemplate DataType="{x:Type vm:PipelineItemViewModel}">
                             <Grid ColumnDefinitions="* Auto">
                                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                    <ComboBox ItemsSource="{stl:EnumSource mdl:ConditionKind}" SelectedItem="{Binding Target.Kind, Mode=TwoWay}" />
+                                    <ComboBox ItemsSource="{stl:EnumSource mdl:SearchKind}" SelectedItem="{Binding Target.Search.Kind, Mode=TwoWay}" />
                                     <TextBox Width="200"
-                                             Text="{Binding Target.Expression, Mode=TwoWay}"
+                                             Text="{Binding Target.Search.With, Mode=TwoWay}"
                                              Watermark="Search content" />
-                                    <CheckBox Content="Ignore case" IsChecked="{Binding Target.IgnoreCase, Mode=TwoWay}" />
+                                    <CheckBox Content="Ignore case" IsChecked="{Binding Target.Search.IgnoreCase, Mode=TwoWay}" />
 
                                     <TextBox Width="70"
                                              Text="{Binding Target.Extract.Match}"
@@ -68,14 +68,14 @@
                                              Watermark="Group index" />
                                 </StackPanel>
                                 <Button Grid.Column="1"
-                                        Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).DeleteConditionCommand}"
+                                        Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).DeletePipelineItemCommand}"
                                         CommandParameter="{Binding}"
                                         Content="Delete" />
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Button Command="{Binding AddConditionCommand}" Content="Add" />
+                <Button Command="{Binding AddPipelineItemCommand}" Content="Add" />
             </StackPanel>
         </Grid>
 

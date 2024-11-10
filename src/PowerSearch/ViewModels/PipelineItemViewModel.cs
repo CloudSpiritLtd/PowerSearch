@@ -8,18 +8,13 @@ using ReactiveUI.Fody.Helpers;
 
 namespace PowerSearch.ViewModels;
 
-public class ConditionViewModel : ViewModelBase
+public class PipelineItemViewModel(PipelineItem item) : ViewModelBase
 {
-    private readonly Condition _condition;
-    private readonly Extract _extract;
+    private readonly PipelineItem _item = item;
+    private readonly Extract? _extract;
     private bool _useExtract;
 
-    public ConditionViewModel(Condition condition)
-    {
-        _condition = condition;
-    }
-
-    public Condition Target { get => _condition; }
+    public PipelineItem Target { get => _item; }
 
     [Reactive]
     public bool UseExtract
@@ -30,7 +25,7 @@ public class ConditionViewModel : ViewModelBase
             if (value != _useExtract)
             {
                 _useExtract = value;
-                _condition.Extract = value ? _extract : null;
+                _item.Extract = value ? _extract : null;
             }
         }
     }

@@ -8,34 +8,35 @@ using PowerSearch.Models;
 
 namespace PowerSearch.Runner;
 
-public class SearchExecutor(Condition cond)
+public class SearchExecutor(Search search, Extract? extract = null)
 {
-    private readonly Condition _cond = cond;
+    private readonly Search _search = search;
+    private readonly Extract? _extract = extract;
 
     public void Execute(string content, SearchResult? lastResult = null)
     {
         Success = false;
-        switch (_cond.Kind)
+        switch (_search.Kind)
         {
-            case ConditionKind.Text:
+            case SearchKind.Text:
                 // var i = content.IndexOf(_filter.Expression);
                 // todo: CaseSensitive
-                var (Line, Column) = LocatePosition(content, _cond.Expression);
+                var (Line, Column) = LocatePosition(content, _search.With);
                 Result.Column = Column;
                 Result.Line = Line;
-                Result.Text = _cond.Expression;   // 考虑大小写问题
+                Result.Text = _search.With;   // 考虑大小写问题
                 break;
-            case ConditionKind.Wildcard:
+            case SearchKind.Wildcard:
                 break;
-            case ConditionKind.Regex:
-                var pattern = _cond.Expression;
+            case SearchKind.Regex:
+                var pattern = _search.With;
                 if (lastResult != null)
                 {
                     //pattern = string.Format(pattern, lastResult.Groups);
                     pattern = pattern.Replace("{1}", lastResult.Text);
                 }
                 RegexOptions options = RegexOptions.None;
-                if (_cond.IgnoreCase)
+                if (_search.IgnoreCase)
                 {
                     options |= RegexOptions.IgnoreCase;
                 }
@@ -44,17 +45,17 @@ public class SearchExecutor(Condition cond)
                 if (matches.Count > 0)
                 {
                     Match? match = null;
-                    if (_cond.Extract == null)
+                    if (_extract == null)
                     {
                         match = matches[0];
                         Result.Text = match.Value;
                     }
-                    else if (matches.Count > _cond.Extract.Match - 1)
+                    else if (matches.Count > _extract.Match - 1)
                     {
-                        match = matches[_cond.Extract.Match - 1];
-                        if (match.Groups.Count > _cond.Extract.Group)
+                        match = matches[_extract.Match - 1];
+                        if (match.Groups.Count > _extract.Group)
                         {
-                            Result.Text = match.Groups[_cond.Extract.Group].Value;
+                            Result.Text = match.Groups[_extract.Group].Value;
                         }
                     }
 
@@ -72,7 +73,7 @@ public class SearchExecutor(Condition cond)
 
     private static (int Line, int Column) LocatePosition(string text, Match match)
     {
-        var lines = text.Split(lineEndings, StringSplitOptions.None);
+        var lines = text.Split(_lineEndings, StringSplitOptions.None);
         int currentCharIndex = 0;
         int matchLine = -1, matchColumn = -1;
 
@@ -117,7 +118,7 @@ public class SearchExecutor(Condition cond)
         if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(target))
             return (-1, -1);
 
-        var lines = text.Split(lineEndings, StringSplitOptions.None);
+        var lines = text.Split(_lineEndings, StringSplitOptions.None);
 
         for (int i = 0; i < lines.Length; i++)
         {
@@ -136,5 +137,5 @@ public class SearchExecutor(Condition cond)
 
     public bool Success { get; set; }
 
-    private static readonly string[] lineEndings = ["\r\n", "\r", "\n"];
+    private static readonly string[] _lineEndings = ["\r\n", "\r", "\n"];
 }
