@@ -1,0 +1,84 @@
+<Project>
+    <PropertyGroup>
+        <Authors>Chris Liu</Authors>
+        <Company>CloudSpiritLtd</Company>
+        <Copyright>Copyright © CloudSpiritLtd, 2024.</Copyright>
+        <FileVersion>1.0.2411.0</FileVersion>
+        <VersionPrefix>1.0.0</VersionPrefix>
+
+        <ProductName>Power Search</ProductName>
+        <Title>Power Search</Title>
+        <Product>Power Search</Product>
+        <Description>Power Search</Description>
+
+        <AssemblyName>$(PackageId)</AssemblyName>
+        <AssemblyTitle>$(Title)</AssemblyTitle>
+        <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+
+        <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <IncludePackageReferencesDuringMarkupCompilation>false</IncludePackageReferencesDuringMarkupCompilation>
+
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AvaloniaVersion>11.2.0</AvaloniaVersion>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(SolutionDir.EndsWith('src\'))">
+        <OutputPath>$(SolutionDir)..\bin\$(Configuration)</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <WeaverConfiguration>
+            <Weavers>
+                <ReactiveUI />
+            </Weavers>
+        </WeaverConfiguration>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'" >
+        <PackageReference Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="HotAvalonia" Version="1.1.1" />
+        <PackageReference Include="HotAvalonia.Extensions" Version="1.1.1" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="FluentAvaloniaUI" Version="2.1.0" />
+        <PackageReference Include="ReactiveUI" Version="20.1.63" />
+
+        <PackageReference Include="Fody" Version="6.8.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Costura.Fody" Version="5.7.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
+
+        <PackageReference Include="DryIoc.dll" Version="5.4.3" />
+        <PackageReference Include="DynamicData" Version="9.0.4" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Prism.Core" Version="9.0.537" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Starlex">
+            <HintPath>$(SolutionDir)..\deps\Starlex.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="Starlex.Avalonia">
+            <HintPath>$(SolutionDir)..\deps\Starlex.Avalonia.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+</Project>
