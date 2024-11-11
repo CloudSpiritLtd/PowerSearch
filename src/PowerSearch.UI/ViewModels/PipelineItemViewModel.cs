@@ -4,28 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PowerSearch.Models;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI;
 
 namespace PowerSearch.ViewModels;
 
-public class PipelineItemViewModel(PipelineItem item) : ViewModelBase
+public class PipelineItemViewModel : ViewModelBase
 {
-    private readonly PipelineItem _item = item;
-    private readonly Extract? _extract;
-    private bool _useExtract;
+    private readonly PipelineItem _item;
 
-    public PipelineItem Target { get => _item; }
+    public PipelineItemViewModel(PipelineItem item)
+    {
+        _item = item;
+        UseExtract = !_item.Extract.IsEmpty();
+    }
 
-    [Reactive]
+    public Search Search { get => _item.Search; }
+
+    public Extract Extract { get => _item.Extract; }
+
+
     public bool UseExtract
     {
-        get { return _useExtract; }
+        get { return _item.UseExtract; }
         set 
         {
-            if (value != _useExtract)
+            if (value != _item.UseExtract)
             {
-                _useExtract = value;
-                _item.Extract = value ? _extract : null;
+                _item.UseExtract = value;
+                (this as IReactiveObject).RaisePropertyChanged();
             }
         }
     }

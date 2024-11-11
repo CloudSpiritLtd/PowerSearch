@@ -54,18 +54,21 @@
                         <DataTemplate DataType="{x:Type vm:PipelineItemViewModel}">
                             <Grid ColumnDefinitions="* Auto">
                                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                    <ComboBox ItemsSource="{stl:EnumSource mdl:SearchKind}" SelectedItem="{Binding Target.Search.Kind, Mode=TwoWay}" />
+                                    <ComboBox ItemsSource="{stl:EnumSource mdl:SearchKind}" SelectedItem="{Binding Search.Kind, Mode=TwoWay}" />
                                     <TextBox Width="200"
-                                             Text="{Binding Target.Search.With, Mode=TwoWay}"
+                                             Text="{Binding Search.With, Mode=TwoWay}"
                                              Watermark="Search content" />
-                                    <CheckBox Content="Ignore case" IsChecked="{Binding Target.Search.IgnoreCase, Mode=TwoWay}" />
+                                    <CheckBox Content="Ignore case" IsChecked="{Binding Search.IgnoreCase, Mode=TwoWay}" />
 
+                                    <CheckBox Content="Use extract" IsChecked="{Binding UseExtract, Mode=TwoWay}" />
                                     <TextBox Width="70"
-                                             Text="{Binding Target.Extract.Match}"
-                                             Watermark="Match index" />
+                                             Text="{Binding Extract.Match}"
+                                             Watermark="Match index"
+                                             IsVisible="{Binding UseExtract}" />
                                     <TextBox Width="70"
-                                             Text="{Binding Target.Extract.Group}"
-                                             Watermark="Group index" />
+                                             Text="{Binding Extract.Group}"
+                                             Watermark="Group index"
+                                             IsVisible="{Binding UseExtract}" />
                                 </StackPanel>
                                 <Button Grid.Column="1"
                                         Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).DeletePipelineItemCommand}"

@@ -12,8 +12,17 @@ namespace PowerSearch.Models;
 [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
 public class PipelineItem
 {
-    public Search Search { get; set; }
+    public bool ShouldSerializeExtract()
+    {
+        return UseExtract;
+    }
 
-    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
-    public Extract? Extract { get; set; } = null;
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public Search Search { get; set; } = new();
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public Extract Extract { get; set; } = new();
+
+    [JsonIgnore]
+    public bool UseExtract { get; set; } = false;
 }
