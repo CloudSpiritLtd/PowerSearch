@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using PowerSearch.Models;
@@ -10,40 +11,65 @@ namespace PowerSearch.Runner;
 public class SimpleRunner(Profile profile)
 {
     private readonly Profile _profile = profile;
+    private readonly ConcurrentQueue<SearchExecutor> _tasks = new();
 
-    public async IAsyncEnumerable<SearchResult> Run(string rootFolder)
+    public Task Run(string rootFolder)
     {
         // todo: 要考虑 profile.Includes & Excludes
         var files = Directory.EnumerateFiles(rootFolder, "*.*", _profile.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         foreach (var file in files)
         {
-            var content = await File.ReadAllTextAsync(file, Encoding.UTF8);
-            SearchResult? lastResult = null;
-            foreach (var item in _profile.Pipeline)
-            {
-                SearchExecutor exec = new(item.Search, item.Extract);
-                exec.Execute(content, lastResult);
-                if (exec.Success)
-                {
-                    lastResult = exec.Result;
-                }
-                else
-                {
-                    lastResult = null;
-                    break;
-                }
-            }
+            // todo: feat: detect encoding, or let user choose
+            // todo: perf: use mmap to scan file
+            // todo: perf: async
+            var content = File.ReadAllText(file, Encoding.UTF8);
 
-            if (lastResult != null)
-            {
-                yield return new()
-                {
-                    FileName = file,
-                    Text = lastResult!.Text,
-                    Line = lastResult!.Line,
-                    Column = lastResult!.Column,
-                };
-            }
+            PipelineItem ppi = _profile.Pipeline.First();
+            SearchExecutor exec = new(0, ppi, content, null);
+            _tasks.Enqueue(exec);
         }
+
+        return Task.Factory.StartNew(() =>
+        {
+            while (true)
+            {
+                if (_tasks.IsEmpty)
+                {
+                    //await Task.Delay(1000);
+                    Thread.Sleep(50);
+                }
+
+                if (_tasks.TryDequeue(out var exec))
+                {
+                    exec.Execute();
+                    if (exec.Results.Count > 0)
+                    {
+                        // reach the end of pipeline, emit results.
+                        if (exec.PipelineId == _profile.Pipeline.Count - 1)
+                        {
+                            Results.AddRange(exec.Results);
+                        }
+                        // create search task with next pipeline item
+                        else
+                        {
+                            int nextId = exec.PipelineId + 1;
+                            var ppi = _profile.Pipeline[nextId];
+                            foreach (var result in exec.Results)
+                            {
+                                SearchExecutor nextExec = new(nextId, ppi, exec.Content, result);
+                                _tasks.Enqueue(nextExec);
+                            }
+                        }
+                    }
+
+                    //todo: if no result?
+
+                    //await Task.Delay(1);
+                    Thread.Sleep(1);
+                }
+            }
+        });
     }
+
+    public List<SearchResult> Results { get; } = [];
 }

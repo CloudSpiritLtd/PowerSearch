@@ -1,79 +1,84 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using PowerSearch.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PowerSearch.Runner;
 
-public class SearchExecutor(Search search, Extract? extract = null)
+public class SearchExecutor(int pipelineId, PipelineItem ppi, string content, SearchResult? lastResult)
 {
-    private readonly Search _search = search;
-    private readonly Extract? _extract = extract;
+    private static readonly string[] _lineEndings = ["\r\n", "\r", "\n"];
+    private readonly string[] lines = content.Split(_lineEndings, StringSplitOptions.None);
 
-    public void Execute(string content, SearchResult? lastResult = null)
+    public void Execute()
     {
-        Success = false;
-        switch (_search.Kind)
+        Results.Clear();
+
+        switch (ppi.Search.Kind)
         {
             case SearchKind.Text:
-                // var i = content.IndexOf(_filter.Expression);
+
                 // todo: CaseSensitive
-                var (Line, Column) = LocatePosition(content, _search.With);
-                Result.Column = Column;
-                Result.Line = Line;
-                Result.Text = _search.With;   // 考虑大小写问题
+                var (Line, Column) = LocatePosition(ppi.Search.With);
+                Results.Add(new()
+                {
+                    Column = Column,
+                    Line = Line,
+                    Text = ppi.Search.With,   // 考虑大小写问题
+                });
                 break;
+
             case SearchKind.Wildcard:
-                break;
+                throw new NotImplementedException("Wildcard search is not supported yet.");
+
             case SearchKind.Regex:
-                var pattern = _search.With;
+                var pattern = ppi.Search.With;
                 if (lastResult != null)
                 {
                     //pattern = string.Format(pattern, lastResult.Groups);
                     pattern = pattern.Replace("{1}", lastResult.Text);
                 }
                 RegexOptions options = RegexOptions.None;
-                if (_search.IgnoreCase)
+                if (ppi.Search.IgnoreCase)
                 {
                     options |= RegexOptions.IgnoreCase;
                 }
                 Regex rx = new(pattern, options);
                 var matches = rx.Matches(content);
+
                 if (matches.Count > 0)
                 {
-                    Match? match = null;
-                    if (_extract == null)
+                    //  do not use extract  || all matches
+                    if (ppi.Extract.IsEmpty || ppi.Extract.UseAllMatches)
                     {
-                        match = matches[0];
-                        Result.Text = match.Value;
-                    }
-                    else if (matches.Count > _extract.Match - 1)
-                    {
-                        match = matches[_extract.Match - 1];
-                        if (match.Groups.Count > _extract.Group)
+                        foreach (Match match in matches)
                         {
-                            Result.Text = match.Groups[_extract.Group].Value;
+                            ExtractResult(match);
                         }
                     }
-
-                    if (match != null)
+                    // match the specific one
+                    // Extract.Match is 1-based.
+                    else if (matches.Count > ppi.Extract.Match - 1)
                     {
-                        var (Line1, Column1) = LocatePosition(content, match);
-                        Result.Column = Column1;
-                        Result.Line = Line1;
-                        Success = true;
+                        var match = matches[ppi.Extract.Match - 1];
+                        ExtractResult(match);
                     }
                 }
+
                 break;
         }
     }
 
-    private static (int Line, int Column) LocatePosition(string text, Match match)
+    private (int Line, int Column) LocatePosition(int matchIndex)
     {
-        var lines = text.Split(_lineEndings, StringSplitOptions.None);
+        if (lines.Length == 0)
+            return (-1, -1);
+
         int currentCharIndex = 0;
         int matchLine = -1, matchColumn = -1;
 
@@ -86,24 +91,24 @@ public class SearchExecutor(Search search, Extract? extract = null)
             //todo: 需要考虑 Condition.Extract, 被提取的组，不一定在匹配项开头。
 
             // 检查匹配项是否在当前行范围内
-            if (match.Index >= currentCharIndex && match.Index < lineEndIndex)
+            if (matchIndex >= currentCharIndex && matchIndex < lineEndIndex)
             {
                 // 计算匹配项的行列位置，行列从 1 开始
                 matchLine = lineIndex + 1;
-                matchColumn = match.Index - currentCharIndex + 1;
+                matchColumn = matchIndex - currentCharIndex + 1;
                 break;
             }
 
             // 更新当前字符索引到下一行的开始位置
             // 根据剩余文本推断换行符长度
             int newlineLength = 1; // 默认假设为 '\n'
-            if (currentCharIndex + line.Length < text.Length)
+            if (currentCharIndex + line.Length < content.Length)
             {
-                char nextChar = text[currentCharIndex + line.Length];
+                char nextChar = content[currentCharIndex + line.Length];
                 if (nextChar == '\r')
                 {
                     // 判断是否为 "\r\n"
-                    newlineLength = (currentCharIndex + line.Length + 1 < text.Length && text[currentCharIndex + line.Length + 1] == '\n') ? 2 : 1;
+                    newlineLength = (currentCharIndex + line.Length + 1 < content.Length && content[currentCharIndex + line.Length + 1] == '\n') ? 2 : 1;
                 }
             }
 
@@ -113,12 +118,10 @@ public class SearchExecutor(Search search, Extract? extract = null)
         return (matchLine, matchColumn);
     }
 
-    private static (int Line, int Column) LocatePosition(string text, string target)
+    private (int Line, int Column) LocatePosition(string target)
     {
-        if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(target))
+        if (lines.Length == 0 || string.IsNullOrEmpty(target))
             return (-1, -1);
-
-        var lines = text.Split(_lineEndings, StringSplitOptions.None);
 
         for (int i = 0; i < lines.Length; i++)
         {
@@ -133,9 +136,33 @@ public class SearchExecutor(Search search, Extract? extract = null)
         return (-1, -1);
     }
 
-    public SearchResult Result { get; set; } = new();
+    private void ExtractResult(Match match)
+    {
+        string text;
+        //  use group for extract && have enough groups to extract
+        if (ppi.Extract.Group > 0 && match.Groups.Count > ppi.Extract.Group)
+        {
+            text = match.Groups[ppi.Extract.Group].Value;
+        }
+        else
+        {
+            text = match.Value;
+        }
 
-    public bool Success { get; set; }
+        var (line, column) = LocatePosition(match.Index);
+        Results.Add(new()
+        {
+            Text = text,
+            Column = column,
+            Line = line,
+        });
+    }
 
-    private static readonly string[] _lineEndings = ["\r\n", "\r", "\n"];
+    // pass to next executor
+    public string Content { get => content; }
+
+    // pass to next executor
+    public int PipelineId { get => pipelineId; }
+
+    public List<SearchResult> Results { get; } = [];
 }

@@ -23,12 +23,26 @@ public class Search
 [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
 public class Extract
 {
-    public bool IsEmpty()
-    {
-        return Match == -1 && Group == -1;
-    }
+    /// <summary>
+    /// The <see cref="Extract" /> will be ignored when it is empty.
+    /// </summary>
+    public bool IsEmpty => Match == -1 && Group == -1;
 
+    /// <summary>
+    /// If true, each match will emit a result.
+    /// If false, specific <see cref="Match"/> will be used to emit result.
+    /// </summary>
+    public bool UseAllMatches => Match == 0;
+
+    /// <summary>
+    /// Specific match index, 1-based.
+    /// 0 for use all. -1 for don't use.
+    /// </summary>
     public int Match { get; set; } = -1;
 
+    /// <summary>
+    /// Specific group index, 1-based.
+    /// 0 is whole match. -1 for don't use.
+    /// </summary>
     public int Group { get; set; } = -1;
 }

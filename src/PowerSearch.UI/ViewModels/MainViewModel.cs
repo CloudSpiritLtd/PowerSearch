@@ -91,8 +91,8 @@ public class MainViewModel : ViewModelBase
 
         Results.Clear();
         SimpleRunner runner = new(_profile);
-        var results = runner.Run(SearchIn);
-        await foreach (var result in results)
+        await runner.Run(SearchIn);
+        foreach (var result in runner.Results)
         {
             Results.Add(result);
         }

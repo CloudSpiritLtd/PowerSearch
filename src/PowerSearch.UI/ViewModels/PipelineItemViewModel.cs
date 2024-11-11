@@ -15,7 +15,7 @@ public class PipelineItemViewModel : ViewModelBase
     public PipelineItemViewModel(PipelineItem item)
     {
         _item = item;
-        UseExtract = !_item.Extract.IsEmpty();
+        UseExtract = !_item.Extract.IsEmpty;
     }
 
     public Search Search { get => _item.Search; }
