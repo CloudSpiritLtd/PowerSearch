@@ -13,5 +13,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\PowerSearch\PowerSearch.csproj" />
+        <ProjectReference Include="..\PowerSearch.UI\PowerSearch.UI.csproj" />
     </ItemGroup>
 </Project>

@@ -13,7 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerSearch.Test", "PowerSearch.Test\PowerSearch.Test.csproj", "{EF1B13EF-DF97-4FF9-820C-B1AAA425F8E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerSearch.Test", "PowerSearch.Test\PowerSearch.Test.csproj", "{EF1B13EF-DF97-4FF9-820C-B1AAA425F8E9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerSearch.UI", "PowerSearch.UI\PowerSearch.UI.csproj", "{A4044C36-BEE2-4E46-818C-D5FBA07798EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{EF1B13EF-DF97-4FF9-820C-B1AAA425F8E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF1B13EF-DF97-4FF9-820C-B1AAA425F8E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF1B13EF-DF97-4FF9-820C-B1AAA425F8E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4044C36-BEE2-4E46-818C-D5FBA07798EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4044C36-BEE2-4E46-818C-D5FBA07798EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4044C36-BEE2-4E46-818C-D5FBA07798EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4044C36-BEE2-4E46-818C-D5FBA07798EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
