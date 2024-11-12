@@ -13,7 +13,7 @@ namespace PowerSearch.Runner;
 public class SearchExecutor(int pipelineId, PipelineItem ppi, string path, string content, SearchResult? lastResult)
 {
     private static readonly string[] _lineEndings = ["\r\n", "\r", "\n"];
-    private readonly string[] lines = content.Split(_lineEndings, StringSplitOptions.None);
+    private readonly string[] _lines = content.Split(_lineEndings, StringSplitOptions.None);
 
     public void Execute()
     {
@@ -30,7 +30,7 @@ public class SearchExecutor(int pipelineId, PipelineItem ppi, string path, strin
                     FileName = path,
                     Column = Column,
                     Line = Line,
-                    Text = ppi.Search.With,   // 考虑大小写问题
+                    Text = ppi.Search.With,   // todo: 考虑大小写问题
                 });
                 break;
 
@@ -42,6 +42,7 @@ public class SearchExecutor(int pipelineId, PipelineItem ppi, string path, strin
                 if (lastResult != null)
                 {
                     //pattern = string.Format(pattern, lastResult.Groups);
+                    // todo: {1} placeholders
                     pattern = pattern.Replace("{1}", lastResult.Text);
                 }
                 RegexOptions options = RegexOptions.None;
@@ -77,16 +78,16 @@ public class SearchExecutor(int pipelineId, PipelineItem ppi, string path, strin
 
     private (int Line, int Column) LocatePosition(int matchIndex)
     {
-        if (lines.Length == 0)
+        if (_lines.Length == 0)
             return (-1, -1);
 
         int currentCharIndex = 0;
         int matchLine = -1, matchColumn = -1;
 
         // 遍历每行，找到匹配项所在的行和列
-        for (int lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+        for (int lineIndex = 0; lineIndex < _lines.Length; lineIndex++)
         {
-            string line = lines[lineIndex];
+            string line = _lines[lineIndex];
             int lineEndIndex = currentCharIndex + line.Length;
 
             //todo: 需要考虑 Condition.Extract, 被提取的组，不一定在匹配项开头。
@@ -121,12 +122,12 @@ public class SearchExecutor(int pipelineId, PipelineItem ppi, string path, strin
 
     private (int Line, int Column) LocatePosition(string target)
     {
-        if (lines.Length == 0 || string.IsNullOrEmpty(target))
+        if (_lines.Length == 0 || string.IsNullOrEmpty(target))
             return (-1, -1);
 
-        for (int i = 0; i < lines.Length; i++)
+        for (int i = 0; i < _lines.Length; i++)
         {
-            int column = lines[i].IndexOf(target, StringComparison.Ordinal);
+            int column = _lines[i].IndexOf(target, StringComparison.Ordinal);
             if (column >= 0)
             {
                 // 行数和列数从 1 开始

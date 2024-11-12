@@ -12,6 +12,11 @@ namespace PowerSearch.Models;
 [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
 public class Search
 {
+    public override string ToString()
+    {
+        return With;
+    }
+
     [JsonConverter(typeof(StringEnumConverter))]
     public SearchKind Kind { get; set; } = SearchKind.Regex;
 
@@ -23,9 +28,15 @@ public class Search
 [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
 public class Extract
 {
+    public override string ToString()
+    {
+        return IsEmpty ? "<EMPTY>" : $"Match={Match}, Group={Group}";
+    }
+
     /// <summary>
     /// The <see cref="Extract" /> will be ignored when it is empty.
     /// </summary>
+    // TODO: what if Match == -1 but Group != -1 ?
     public bool IsEmpty => Match == -1 && Group == -1;
 
     /// <summary>
