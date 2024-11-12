@@ -10,7 +10,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace PowerSearch.Runner;
 
-public class SearchExecutor(int pipelineId, PipelineItem ppi, string content, SearchResult? lastResult)
+public class SearchExecutor(int pipelineId, PipelineItem ppi, string path, string content, SearchResult? lastResult)
 {
     private static readonly string[] _lineEndings = ["\r\n", "\r", "\n"];
     private readonly string[] lines = content.Split(_lineEndings, StringSplitOptions.None);
@@ -27,6 +27,7 @@ public class SearchExecutor(int pipelineId, PipelineItem ppi, string content, Se
                 var (Line, Column) = LocatePosition(ppi.Search.With);
                 Results.Add(new()
                 {
+                    FileName = path,
                     Column = Column,
                     Line = Line,
                     Text = ppi.Search.With,   // 考虑大小写问题
@@ -152,6 +153,7 @@ public class SearchExecutor(int pipelineId, PipelineItem ppi, string content, Se
         var (line, column) = LocatePosition(match.Index);
         Results.Add(new()
         {
+            FileName = path,
             Text = text,
             Column = column,
             Line = line,
@@ -160,6 +162,9 @@ public class SearchExecutor(int pipelineId, PipelineItem ppi, string content, Se
 
     // pass to next executor
     public string Content { get => content; }
+
+    // pass to next executor
+    public string Path { get => path; }
 
     // pass to next executor
     public int PipelineId { get => pipelineId; }

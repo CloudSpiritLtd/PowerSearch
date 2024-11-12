@@ -27,6 +27,7 @@ public class SimpleRunner(Profile profile)
             PipelineItem ppi = _profile.Pipeline.First();
             SearchExecutor exec = new(0, ppi, file, content, null);
             _tasks.Enqueue(exec);
+            TaskChanged?.Invoke(this, _tasks.Count);
         }
 
         return Task.Factory.StartNew(() =>
@@ -48,6 +49,8 @@ public class SimpleRunner(Profile profile)
 
                 if (_tasks.TryDequeue(out var exec))
                 {
+                    TaskChanged?.Invoke(this, _tasks.Count);
+
                     exec.Execute();
                     if (exec.Results.Count > 0)
                     {
@@ -65,6 +68,7 @@ public class SimpleRunner(Profile profile)
                             {
                                 SearchExecutor nextExec = new(nextId, ppi, exec.Path, exec.Content, result);
                                 _tasks.Enqueue(nextExec);
+                                TaskChanged?.Invoke(this, _tasks.Count);
                             }
                         }
                     }
@@ -79,4 +83,6 @@ public class SimpleRunner(Profile profile)
     }
 
     public List<SearchResult> Results { get; } = [];
+
+    public event EventHandler<int>? TaskChanged;
 }

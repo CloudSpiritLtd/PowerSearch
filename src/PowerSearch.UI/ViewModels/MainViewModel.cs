@@ -91,6 +91,10 @@ public class MainViewModel : ViewModelBase
 
         Results.Clear();
         SimpleRunner runner = new(_profile);
+        runner.TaskChanged += (s, e) =>
+        {
+            TaskCount = e;
+        };
         await runner.Run(SearchIn);
         foreach (var result in runner.Results)
         {
@@ -115,4 +119,7 @@ public class MainViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SearchCommand { get; }
 
     public string SearchIn { get; set; } = string.Empty;
+
+    [Reactive]
+    public int TaskCount { get; set; }
 }

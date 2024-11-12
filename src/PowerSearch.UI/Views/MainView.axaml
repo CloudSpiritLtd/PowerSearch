@@ -19,13 +19,7 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <Grid ShowGridLines="True">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="2*" />
-            <RowDefinition Height="3*" />
-        </Grid.RowDefinitions>
+    <Grid ShowGridLines="True" RowDefinitions="Auto Auto 2* 3* Auto">
 
         <!--  profiles  -->
         <Grid Grid.Row="0">
@@ -91,7 +85,16 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding FileName}" Header="File" />
                 <DataGridTextColumn Binding="{Binding Text}" Header="Content" />
+                <DataGridTextColumn Binding="{Binding Line}" Header="Line" />
+                <DataGridTextColumn Binding="{Binding Column}" Header="Column" />
             </DataGrid.Columns>
         </DataGrid>
+
+        <Grid Grid.Row="4">
+            <TextBlock>
+                <Run Text="Tasks:" />
+                <Run Text="{Binding TaskCount}" />
+            </TextBlock>
+        </Grid>
     </Grid>
 </UserControl>
