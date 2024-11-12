@@ -25,7 +25,7 @@ public class SimpleRunner(Profile profile)
             var content = File.ReadAllText(file, Encoding.UTF8);
 
             PipelineItem ppi = _profile.Pipeline.First();
-            SearchExecutor exec = new(0, ppi, content, null);
+            SearchExecutor exec = new(0, ppi, file, content, null);
             _tasks.Enqueue(exec);
         }
 
@@ -37,6 +37,13 @@ public class SimpleRunner(Profile profile)
                 {
                     //await Task.Delay(1000);
                     Thread.Sleep(50);
+
+                    if (_tasks.IsEmpty)
+                    {
+                        Thread.Sleep(1000);
+                        if (_tasks.IsEmpty)
+                            break;
+                    }
                 }
 
                 if (_tasks.TryDequeue(out var exec))
@@ -56,7 +63,7 @@ public class SimpleRunner(Profile profile)
                             var ppi = _profile.Pipeline[nextId];
                             foreach (var result in exec.Results)
                             {
-                                SearchExecutor nextExec = new(nextId, ppi, exec.Content, result);
+                                SearchExecutor nextExec = new(nextId, ppi, exec.Path, exec.Content, result);
                                 _tasks.Enqueue(nextExec);
                             }
                         }
